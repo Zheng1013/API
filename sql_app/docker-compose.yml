@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+
+  # MySQL 服務
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: a12345  # 更改為您的 MySQL 密碼
+      MYSQL_DATABASE: test2  # 更改為您的資料庫名稱
+      MYSQL_USER: andy  # 更改為您的用戶名
+      MYSQL_PASSWORD: andy123  # 更改為您的用戶密碼
+    ports:
+      - "3306:3306"  # 映射 MySQL 的 3306 端口到宿主机的 3306 端口
+      
+  # FastAPI 服務
+  fastapi:
+    build:
+      context: .
+      dockerfile: ./Dockerfile  # 指定你的 FastAPI Dockerfile 路徑
+    ports:
+      - "8000:80"  # 映射 FastAPI 的 8000 端口到宿主机的 8000 端口
+    depends_on:
+       -mysql
+
+  # Nginx 服务
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"  # 映射 Nginx 的 80 端口到宿主机的 80 端口
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro  # 将本地的 nginx.conf 文件挂载到容器内的 Nginx 配置路径
+    depends_on:
+      - fastapi  # Nginx 依赖于 FastAPI
+
+  
